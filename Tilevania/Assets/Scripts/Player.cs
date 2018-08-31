@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
 public class Player : MonoBehaviour
@@ -9,13 +10,14 @@ public class Player : MonoBehaviour
 
   bool IsRunning = false;
   bool IsClimbing = false;
-  bool IsJumping = false;
+  bool IsAlive = true;
 
   private Rigidbody2D _rigidBody;
   private Animator _animator;
   private CapsuleCollider2D _playerCollider;
   private BoxCollider2D _feetCollider;
   private Vector2 _playerDirection;
+  private GameSession _gameSession;
 
   private float _startingGravity;
   private bool _allowedToClimb = true;
@@ -27,6 +29,7 @@ public class Player : MonoBehaviour
     _animator = GetComponent<Animator>();
     _playerCollider = GetComponent<CapsuleCollider2D>();
     _feetCollider = GetComponent<BoxCollider2D>();
+    _gameSession = FindObjectOfType<GameSession>();
 
     _startingGravity = _rigidBody.gravityScale;
   }
@@ -34,10 +37,14 @@ public class Player : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    Run();
-    FlipSprite();
-    Jump();
-    ClimbLadder();
+    if (IsAlive)
+    {
+      Run();
+      FlipSprite();
+      Jump();
+      ClimbLadder();
+      CheckHazard();
+    }
   }
 
   void FixedUpdate()
@@ -55,6 +62,12 @@ public class Player : MonoBehaviour
   {
     if (collider.name == "Climbing")
       _allowedToClimb = true;
+
+    // Player collided with enemy
+    if (collider.GetComponent<EnemyMovement>())
+    {
+      Die();
+    }
   }
 
   private void Run()
@@ -118,5 +131,20 @@ public class Player : MonoBehaviour
     IsClimbing = false;
     _animator.SetBool("IsClimbing", IsClimbing);
     _rigidBody.gravityScale = _startingGravity;
+  }
+
+  private void Die()
+  {
+    _animator.SetTrigger("Death");
+    IsAlive = false;
+    _gameSession.ProcessPlayerDeath();
+  }
+
+  private void CheckHazard()
+  {
+    if (_playerCollider.IsTouchingLayers(LayerMask.GetMask("Hazard")))
+    {
+      Die();
+    }
   }
 }

@@ -21,7 +21,6 @@ public class EdgeDetector : MonoBehaviour
 
   void OnTriggerExit2D(Collider2D collider)
   {
-    print("TRIGGER EXIT");
     if (collider.name == "Foreground")
     {
       FlipEnemy();
