@@ -68,6 +68,12 @@ public class Player : MonoBehaviour
     {
       Die();
     }
+
+    var coin = collider.GetComponent<Coin>();
+    if (coin)
+    {
+      PickupCoin(coin);
+    }
   }
 
   private void Run()
@@ -146,5 +152,10 @@ public class Player : MonoBehaviour
     {
       Die();
     }
+  }
+
+  private void PickupCoin(Coin coin)
+  {
+    _gameSession.AddToScore(coin.ScoreValue);
   }
 }
